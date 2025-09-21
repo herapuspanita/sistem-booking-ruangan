@@ -1,1 +1,420 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sistem Booking Ruangan — Demo</title>
+  <meta name="description" content="Demo sederhana sistem booking ruangan (HTML/CSS/JS)."/>
+
+  <style>
+    :root{
+      --max-width:900px;
+      --accent: #2563eb;
+      --muted: #6b7280;
+      --card-bg: #ffffff;
+      --bg: #f7f7fb;
+      --radius: 10px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+
+    html,body{
+      height:100%;
+      margin:0;
+      background:var(--bg);
+      color:#111827;
+    }
+
+    .container{
+      max-width:var(--max-width);
+      margin:32px auto;
+      padding:20px;
+    }
+
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:18px;
+    }
+
+    header h1{
+      font-size:1.25rem;
+      margin:0;
+    }
+    header p{ margin:0; color:var(--muted); font-size:.95rem;}
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:18px;
+    }
+
+    @media(min-width:900px){
+      .grid { grid-template-columns: 1fr 380px; align-items:start;}
+    }
+
+    .card{
+      background:var(--card-bg);
+      border-radius:var(--radius);
+      padding:16px;
+      box-shadow: 0 6px 18px rgba(15,23,42,0.06);
+    }
+
+    form .row{
+      display:flex;
+      gap:10px;
+      margin-bottom:12px;
+    }
+
+    .col{
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+
+    label{
+      font-size:.9rem;
+      color:var(--muted);
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="date"],
+    input[type="time"],
+    select,
+    textarea{
+      padding:10px 12px;
+      border-radius:8px;
+      border:1px solid #e6e9ef;
+      font-size:.95rem;
+      outline:none;
+      background: #fff;
+    }
+    textarea{ min-height:90px; resize:vertical; }
+
+    .btn-row{ display:flex; gap:8px; margin-top:8px; }
+    button{
+      cursor:pointer;
+      border:0;
+      padding:10px 12px;
+      border-radius:8px;
+      font-weight:600;
+      font-size:.95rem;
+    }
+
+    .btn-primary{
+      background:var(--accent);
+      color:#fff;
+      box-shadow: 0 6px 14px rgba(37,99,235,0.12);
+    }
+    .btn-ghost{
+      background:transparent;
+      color:var(--muted);
+      border:1px solid #e6e9ef;
+    }
+
+    .note{ color:var(--muted); font-size:.92rem; margin-top:8px; }
+
+    .list-heading{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    .booking-list{ margin-top:12px; display:flex; flex-direction:column; gap:10px; max-height:420px; overflow:auto; padding-right:6px; }
+
+    .booking-item{
+      border-radius:8px;
+      padding:12px;
+      background: linear-gradient(180deg, #fff, #fbfdff);
+      border:1px solid #eef2ff;
+      box-shadow: 0 2px 8px rgba(15,23,42,0.03);
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:flex-start;
+    }
+
+    .meta{ color:var(--muted); font-size:.88rem; }
+    .badge{ font-size:.8rem; padding:6px 8px; border-radius:999px; background:#eef2ff; color: #1e3a8a; }
+
+    .empty{ color:var(--muted); text-align:center; padding:18px 12px; }
+
+    .error{ color:#b91c1c; font-size:.9rem; margin-top:6px; }
+
+    footer{ margin-top:18px; color:var(--muted); font-size:.85rem; text-align:center;}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>Sistem Booking Ruangan — Demo</h1>
+        <p>Form sederhana untuk demo create/commit/branch pada repo (local demo).</p>
+      </div>
+      <div style="text-align:right">
+        <p style="margin:0; font-size:.9rem; color:var(--muted)">User: <strong>Guest</strong></p>
+        <p style="margin:0; font-size:.8rem; color:var(--muted)">Environment: Static demo</p>
+      </div>
+    </header>
+
+    <main class="grid">
+      <!-- Form Card -->
+      <section class="card" aria-labelledby="form-heading">
+        <h2 id="form-heading" style="margin-top:0">Buat Booking Baru</h2>
+
+        <form id="bookingForm" novalidate>
+          <div class="row">
+            <div class="col">
+              <label for="name">Nama lengkap <span aria-hidden="true">*</span></label>
+              <input id="name" name="name" type="text" placeholder="Contoh: Hera Puspanita" required />
+            </div>
+            <div class="col">
+              <label for="email">Email <span aria-hidden="true">*</span></label>
+              <input id="email" name="email" type="email" placeholder="email@domain.com" required />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col">
+              <label for="room">Pilih Ruangan <span aria-hidden="true">*</span></label>
+              <select id="room" name="room" required>
+                <option value="">-- Pilih ruangan --</option>
+                <option>Ruang Rapat A (Lantai 1)</option>
+                <option>Ruang Rapat B (Lantai 2)</option>
+                <option>Ruang Meeting Kecil</option>
+                <option>Laboratorium Komputer</option>
+              </select>
+            </div>
+            <div class="col">
+              <label for="date">Tanggal <span aria-hidden="true">*</span></label>
+              <input id="date" name="date" type="date" required />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col">
+              <label for="start">Jam Mulai <span aria-hidden="true">*</span></label>
+              <input id="start" name="start" type="time" required />
+            </div>
+            <div class="col">
+              <label for="end">Jam Selesai <span aria-hidden="true">*</span></label>
+              <input id="end" name="end" type="time" required />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col">
+              <label for="note">Keterangan (opsional)</label>
+              <textarea id="note" name="note" placeholder="Misal: butuh proyektor"></textarea>
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <button type="submit" class="btn-primary">Submit Booking</button>
+            <button type="reset" class="btn-ghost">Reset</button>
+          </div>
+
+          <p class="note">Semua field bertanda * wajib diisi. Data disimpan di browser (localStorage) sebagai demo.</p>
+          <div id="formError" class="error" role="alert" aria-live="polite" style="display:none"></div>
+        </form>
+      </section>
+
+      <!-- Booking List Card -->
+      <aside class="card" aria-labelledby="list-heading">
+        <div class="list-heading">
+          <h3 id="list-heading" style="margin:0">Daftar Booking</h3>
+          <div>
+            <button id="clearAll" class="btn-ghost" title="Hapus semua booking">Clear All</button>
+          </div>
+        </div>
+
+        <div id="bookings" class="booking-list" aria-live="polite" aria-relevant="additions removals">
+          <!-- booking items injected here -->
+        </div>
+
+        <div id="emptyState" class="empty" style="display:none">Belum ada booking.</div>
+      </aside>
+    </main>
+
+    <footer>
+      <small>Demo &mdash; simpanan bersifat lokal di browser (tidak dikirim ke server).</small>
+    </footer>
+  </div>
+
+  <script>
+    // ====== Simple client-side booking demo ======
+    // Storage key
+    const STORAGE_KEY = 'demo_bookings_v1';
+
+    // helpers
+    const $ = id => document.getElementById(id);
+    const nowIsoDate = () => new Date().toISOString();
+
+    // load bookings from localStorage
+    function loadBookings(){
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch(e){
+        console.error('Failed to parse bookings', e);
+        return [];
+      }
+    }
+
+    // save bookings
+    function saveBookings(list){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    }
+
+    // render list
+    function renderBookings(){
+      const container = $('bookings');
+      const empty = $('emptyState');
+      container.innerHTML = '';
+      const list = loadBookings();
+
+      if(!list.length){
+        empty.style.display = 'block';
+        return;
+      }
+      empty.style.display = 'none';
+
+      // sort by date then start time
+      list.sort((a,b) => {
+        if(a.date === b.date) return a.start.localeCompare(b.start);
+        return a.date.localeCompare(b.date);
+      });
+
+      list.forEach((b, idx) => {
+        const item = document.createElement('article');
+        item.className = 'booking-item';
+        item.setAttribute('aria-label', `Booking ${b.room} tanggal ${b.date} jam ${b.start} sampai ${b.end}`);
+
+        const left = document.createElement('div');
+        left.style.flex = '1';
+
+        const title = document.createElement('div');
+        title.style.display = 'flex';
+        title.style.justifyContent = 'space-between';
+        title.style.alignItems = 'center';
+        title.innerHTML = `<strong>${escapeHtml(b.room)}</strong> <span class="badge">${escapeHtml(b.date)} ${escapeHtml(b.start)}–${escapeHtml(b.end)}</span>`;
+
+        const desc = document.createElement('div');
+        desc.style.marginTop = '8px';
+        desc.innerHTML = `<div style="font-weight:600">${escapeHtml(b.name)}</div><div class="meta">${escapeHtml(b.email)} · ${escapeHtml(b.note || '')}</div>`;
+
+        left.appendChild(title);
+        left.appendChild(desc);
+
+        const right = document.createElement('div');
+        right.style.display = 'flex';
+        right.style.flexDirection = 'column';
+        right.style.gap = '8px';
+        right.style.alignItems = 'flex-end';
+
+        const time = document.createElement('div');
+        time.className = 'meta';
+        time.textContent = `Dibuat: ${new Date(b.createdAt).toLocaleString()}`;
+
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'btn-ghost';
+        removeBtn.textContent = 'Hapus';
+        removeBtn.onclick = () => {
+          if(confirm('Hapus booking ini?')) {
+            const arr = loadBookings();
+            arr.splice(idx, 1);
+            saveBookings(arr);
+            renderBookings();
+          }
+        };
+
+        right.appendChild(time);
+        right.appendChild(removeBtn);
+
+        item.appendChild(left);
+        item.appendChild(right);
+
+        container.appendChild(item);
+      });
+    }
+
+    // simple html escape
+    function escapeHtml(str=''){
+      return String(str)
+        .replaceAll('&','&amp;')
+        .replaceAll('<','&lt;')
+        .replaceAll('>','&gt;')
+        .replaceAll('"','&quot;')
+        .replaceAll("'",'&#39;');
+    }
+
+    // form submit handler
+    document.addEventListener('DOMContentLoaded', () => {
+      renderBookings();
+
+      const form = $('bookingForm');
+      const errorBox = $('formError');
+
+      form.addEventListener('submit', (ev) => {
+        ev.preventDefault();
+        errorBox.style.display = 'none';
+        errorBox.textContent = '';
+
+        const data = {
+          name: form.name.value.trim(),
+          email: form.email.value.trim(),
+          room: form.room.value,
+          date: form.date.value,
+          start: form.start.value,
+          end: form.end.value,
+          note: form.note.value.trim(),
+          createdAt: nowIsoDate()
+        };
+
+        // basic validation
+        if(!data.name || !data.email || !data.room || !data.date || !data.start || !data.end){
+          showError('Mohon isi semua field yang wajib.');
+          return;
+        }
+
+        // validate time order (simple)
+        if(data.start >= data.end){
+          showError('Jam mulai harus lebih kecil dari jam selesai.');
+          return;
+        }
+
+        // naive conflict check: same room + date + overlapping times
+        const existing = loadBookings();
+        const conflict = existing.some(b => {
+          if(b.room !== data.room || b.date !== data.date) return false;
+          // check overlap
+          return !(data.end <= b.start || data.start >= b.end);
+        });
+
+        if(conflict){
+          if(!confirm('Terlihat ada booking yang bertabrakan dengan waktu ini. Tetap buat booking?')) {
+            return;
+          }
+        }
+
+        existing.push(data);
+        saveBookings(existing);
+        form.reset();
+        renderBookings();
+        alert('Booking berhasil disimpan (demo lokal).');
+      });
+
+      $('clearAll').addEventListener('click', () => {
+        if(confirm('Hapus semua booking dari browser?')){
+          localStorage.removeItem(STORAGE_KEY);
+          renderBookings();
+        }
+      });
+
+      function showError(msg){
+        errorBox.style.display = 'block';
+        errorBox.textContent = msg;
+      }
+    });
+  </script>
+</body>
+</html>
 
